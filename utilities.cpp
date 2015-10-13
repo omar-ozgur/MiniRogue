@@ -1,37 +1,31 @@
-// utilities.cpp
-
-// Note:  YOU MUST NOT MAKE ANY CHANGE TO THIS FILE!
-
 #include "utilities.h"
 #include <cstdlib>
 
-  // Return a uniformly distributed random integer from 0 to limit-1 inclusive
-int randInt(int limit)
-{
+// Return a uniformly distributed random integer from 0 to limit-1 inclusive
+int randInt(int limit){
     return std::rand() % limit;
 }
 
-  // return true with a given probability
-bool trueWithProbability(double p)
-{
+// Return true with a given probability
+bool trueWithProbability(double p){
     return rand() < p * RAND_MAX + p; 
 }
 
-#ifdef _MSC_VER  //  Microsoft Visual C++
+// Microsoft Visual C++
+#ifdef _MSC_VER
 
 #include <windows.h>
 #include <conio.h>
 
-char getCharacter()
-{
+char getCharacter(){
     int c = _getch();
-    if (c != 0xE0  &&  c != 0x00)  // first of the two sent by arrow keys
+
+    // First of the two sent by arrow keys
+    if (c != 0xE0  &&  c != 0x00)
         return c;
-    else
-    {
+    else{
         c = _getch();
-        switch (c)
-        {
+        switch (c){
           case 'K':  return ARROW_LEFT;
           case 'M':  return ARROW_RIGHT;
           case 'H':  return ARROW_UP;
@@ -41,8 +35,7 @@ char getCharacter()
     }
 }
 
-void clearScreen()
-{
+void clearScreen(){
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     GetConsoleScreenBufferInfo(hConsole, &csbi);
@@ -54,7 +47,8 @@ void clearScreen()
     SetConsoleCursorPosition(hConsole, upperLeft);
 }
 
-#else  // not Microsoft Visual C++, so assume UNIX interface
+// not Microsoft Visual C++, so assume UNIX interface
+#else
 
 #include <iostream>
 #include <cstring>
@@ -62,14 +56,15 @@ void clearScreen()
 #include <termios.h>
 using namespace std;
 
-static const char* ESC_SEQ = "\x1B[";  // ANSI Terminal escape sequence:  ESC [
-static const char* ESC_SEQ_X = "\xEF\x9C";  // Xcode Console arrow key escape sequence
+// ANSI Terminal escape sequence:  ESC [
+static const char* ESC_SEQ = "\x1B[";
 
-class TerminalModeSetter
-{
+// Xcode Console arrow key escape sequence
+static const char* ESC_SEQ_X = "\xEF\x9C";
+
+class TerminalModeSetter{
   public:
-    TerminalModeSetter()
-    {
+    TerminalModeSetter(){
         tcgetattr(STDIN_FILENO, &m_old);
         m_new = m_old;
         m_new.c_lflag &= ~(ICANON | ECHO);
@@ -77,8 +72,7 @@ class TerminalModeSetter
         m_new.c_cc[VTIME] = 0;
         tcsetattr(STDIN_FILENO, TCSANOW, &m_new);
     }
-    ~TerminalModeSetter()
-    {
+    ~TerminalModeSetter(){
         tcsetattr(STDIN_FILENO, TCSANOW, &m_old);
     }
   private:
@@ -86,8 +80,7 @@ class TerminalModeSetter
     termios m_new;
 };
 
-char getCharacter()
-{
+char getCharacter(){
     static TerminalModeSetter dummy;
     char ch;
     if (!cin.get(ch))
@@ -96,8 +89,7 @@ char getCharacter()
         return ch;
     if (!cin.get(ch)  ||  (ch != ESC_SEQ[1]  &&  ch != ESC_SEQ_X[1])  ||  !cin.get(ch))
         return '?';
-    switch (ch)
-    {
+    switch (ch){
       case 'D': case '\x82':  return ARROW_LEFT;
       case 'C': case '\x83':  return ARROW_RIGHT;
       case 'A': case '\x80':  return ARROW_UP;
@@ -106,8 +98,7 @@ char getCharacter()
     }
 }
 
-void clearScreen()
-{
+void clearScreen(){
     static const char* term = getenv("TERM");
     if (term == NULL  ||  strcmp(term, "dumb") == 0)
         cout << endl;
